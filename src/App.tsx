@@ -7,6 +7,8 @@ import { AiUnitPlannerModal } from './components/AiUnitPlannerModal';
 import { PrintableLessonPlan } from './components/PrintableLessonPlan';
 import { UnitEvaluationDashboard } from './components/UnitEvaluationDashboard';
 import { UnifiedCyclePdfReport } from './components/UnifiedCyclePdfReport';
+import { StudentReflectionWorksheet } from './components/StudentReflectionWorksheet';
+import { ShareQrModal } from './components/ShareQrModal';
 import {
   BookOpen,
   Sparkles,
@@ -24,7 +26,9 @@ import {
   CheckCircle2,
   ListFilter,
   Plus,
-  BarChart3
+  BarChart3,
+  PenTool,
+  QrCode
 } from 'lucide-react';
 
 export default function App() {
@@ -44,9 +48,22 @@ export default function App() {
   const [isAiModalOpen, setIsAiModalOpen] = useState<boolean>(false);
   const [isPrintModalOpen, setIsPrintModalOpen] = useState<boolean>(false);
   const [isCyclePdfOpen, setIsCyclePdfOpen] = useState<boolean>(false);
+  const [isStudentWorksheetOpen, setIsStudentWorksheetOpen] = useState<boolean>(false);
+  const [isQrModalOpen, setIsQrModalOpen] = useState<boolean>(false);
 
   // Active Selected Unit
   const currentUnit = units.find((u) => u.id === selectedUnitId) || units[0];
+
+  // Deep linking: read ?unit= from URL on load
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const unitParam = params.get('unit');
+      if (unitParam && units.some((u) => u.id === unitParam)) {
+        setSelectedUnitId(unitParam);
+      }
+    }
+  }, [units]);
 
   // Filtered unit list
   const filteredUnits = units.filter((u) => {
@@ -313,12 +330,38 @@ export default function App() {
                 )}
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={() => setIsStudentWorksheetOpen(true)}
+                  className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors shadow-2xs"
+                  title="児童が統合的理解と総合的発揮を振り返るA4ワークシートを出力"
+                >
+                  <PenTool className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>児童用ふり返りシート</span>
+                </button>
+                <button
+                  onClick={() => setIsCyclePdfOpen(true)}
+                  className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                  title="校内研修用の二つの一体化マップPDFレポートを出力"
+                >
+                  <FileText className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>一体化マップPDF</span>
+                </button>
                 <button
                   onClick={() => setIsPrintModalOpen(true)}
-                  className="text-xs text-slate-600 hover:text-slate-900 font-medium flex items-center gap-1"
+                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                  title="教員用単元構想シートをA4出力"
                 >
-                  <Printer className="w-3.5 h-3.5" /> A4シート出力
+                  <Printer className="w-3.5 h-3.5 text-slate-500" />
+                  <span>指導案シート</span>
+                </button>
+                <button
+                  onClick={() => setIsQrModalOpen(true)}
+                  className="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-2xs"
+                  title="この単元のQRコード・共有リンクを表示"
+                >
+                  <QrCode className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>QR共有</span>
                 </button>
               </div>
             </div>
@@ -816,6 +859,20 @@ export default function App() {
         unit={currentUnit}
         isOpen={isCyclePdfOpen}
         onClose={() => setIsCyclePdfOpen(false)}
+      />
+
+      {/* Student Reflection Worksheet Modal */}
+      <StudentReflectionWorksheet
+        unit={currentUnit}
+        isOpen={isStudentWorksheetOpen}
+        onClose={() => setIsStudentWorksheetOpen(false)}
+      />
+
+      {/* Unit QR Code Share Modal */}
+      <ShareQrModal
+        unit={currentUnit}
+        isOpen={isQrModalOpen}
+        onClose={() => setIsQrModalOpen(false)}
       />
 
       {/* Footer */}
