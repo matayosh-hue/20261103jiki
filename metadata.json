@@ -1,0 +1,6 @@
+{
+  "name": "次期学習指導要領 統合的理解・総合的発揮 単元具体例ナビゲーター",
+  "description": "小学校各教科・学年の単元ごとに「統合的な理解」と「総合的な発揮」の具体例、児童の思考比較（A/B/C）、思考プロセス、指導のポイントを可視化する教員向け授業づくり支援アプリ",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
