@@ -6,6 +6,7 @@ import { OfficialMaterialsModal } from './components/OfficialMaterialsModal';
 import { AiUnitPlannerModal } from './components/AiUnitPlannerModal';
 import { PrintableLessonPlan } from './components/PrintableLessonPlan';
 import { UnitEvaluationDashboard } from './components/UnitEvaluationDashboard';
+import { UnifiedCyclePdfReport } from './components/UnifiedCyclePdfReport';
 import {
   BookOpen,
   Sparkles,
@@ -42,6 +43,7 @@ export default function App() {
   const [initialMaterialIdx, setInitialMaterialIdx] = useState<number>(0);
   const [isAiModalOpen, setIsAiModalOpen] = useState<boolean>(false);
   const [isPrintModalOpen, setIsPrintModalOpen] = useState<boolean>(false);
+  const [isCyclePdfOpen, setIsCyclePdfOpen] = useState<boolean>(false);
 
   // Active Selected Unit
   const currentUnit = units.find((u) => u.id === selectedUnitId) || units[0];
@@ -378,16 +380,27 @@ export default function App() {
             <div className="space-y-6">
               {/* Dual Integration Framework Diagram */}
               <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs">
-                <div className="text-center max-w-2xl mx-auto mb-6">
-                  <span className="text-xs font-bold text-indigo-600 tracking-wider">
-                    次期学習指導要領 中核コンセプト
-                  </span>
-                  <h3 className="text-lg sm:text-xl font-bold text-slate-900 mt-1">
-                    「統合的な理解」と「総合的な発揮」の往還サイクル
-                  </h3>
-                  <p className="text-xs text-slate-500 mt-1">
-                    使うことで理解が深まり、理解が次の活用を支える。順番は固定ではなく行きつ戻りつしながら深まります。
-                  </p>
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-100 pb-4 mb-6">
+                  <div>
+                    <span className="text-xs font-bold text-indigo-600 tracking-wider">
+                      次期学習指導要領 中核コンセプト
+                    </span>
+                    <h3 className="text-lg sm:text-xl font-bold text-slate-900 mt-0.5">
+                      「統合的な理解」と「総合的な発揮」の往還サイクル
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      使うことで理解が深まり、理解が次の活用を支える。順番は固定ではなく行きつ戻りつしながら深まります。
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => setIsCyclePdfOpen(true)}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-sm transition-all flex items-center gap-1.5 shrink-0"
+                    title="職員室での研修・指導案検討会用のPDFレポートを出力"
+                  >
+                    <FileText className="w-4 h-4" />
+                    <span>一体化マップをPDF出力（校内研修用）</span>
+                  </button>
                 </div>
 
                 {/* 3-Column Visual Flow */}
@@ -796,6 +809,13 @@ export default function App() {
         unit={currentUnit}
         isOpen={isPrintModalOpen}
         onClose={() => setIsPrintModalOpen(false)}
+      />
+
+      {/* Unified Cycle PDF Report Modal */}
+      <UnifiedCyclePdfReport
+        unit={currentUnit}
+        isOpen={isCyclePdfOpen}
+        onClose={() => setIsCyclePdfOpen(false)}
       />
 
       {/* Footer */}

@@ -22,6 +22,7 @@ import {
   BarChart3,
   Compass
 } from 'lucide-react';
+import { InstructionCoachAI } from './InstructionCoachAI';
 
 interface Props {
   unit: UnitData;
@@ -600,6 +601,9 @@ export const UnitEvaluationDashboard: React.FC<Props> = ({ unit }) => {
           </div>
         </div>
       </div>
+
+      {/* Instructional Improvement AI Coach Component */}
+      <InstructionCoachAI unit={unit} />
     </div>
   );
 };

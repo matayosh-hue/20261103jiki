@@ -151,6 +151,67 @@ ${challengeTopic ? `- 扱う題材や探究課題の希望: ${challengeTopic}` :
     }
   });
 
+  // API endpoint for Instructional Improvement AI Coach
+  app.post('/api/coach-feedback', async (req, res) => {
+    try {
+      const { unit, targetType, situation, customObservation, metrics } = req.body;
+      
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        return res.status(400).json({ 
+          error: 'GEMINI_API_KEY is not configured.' 
+        });
+      }
+
+      const ai = new GoogleGenAI({ apiKey });
+      const prompt = `あなたは文部科学省・学習指導要領改訂に携わる小学校の主任指導主事・優れた授業実践メンター（AIコーチ）です。
+次期学習指導要領の最重要概念である「統合的な理解」と「総合的な発揮」を育てるため、教員が目の前の学習者の認知状態やレーダーチャートの分析データに基づいて、どのような形成的評価や声かけ（フィードバック）を返すのが適切かを具体的に提案してください。
+
+【対象単元情報】
+- 教科: ${unit?.subject || '算数'}（${unit?.gradeLabel || '第5・6学年'}）
+- 単元名: ${unit?.unitName || '割合・単位量当たりの大きさ・比'}
+- 働かせる見方・考え方: ${unit?.perspective || '二つの数量の関係に着目する'}
+- 課題場面: ${unit?.holisticApplication?.problemScene?.title || ''}（${unit?.holisticApplication?.problemScene?.description || ''}）
+
+【対象とする児童タイプ・学習状態】
+- 対象: ${targetType}
+- 指導場面: ${situation}
+${customObservation ? `- 先生が気付いた児童の様子・発言・メモ: ${customObservation}` : ''}
+${metrics ? `- 現在の評価軸スコア情報: ${JSON.stringify(metrics)}` : ''}
+
+【指導助言の指針】:
+1. 答えややり方を教師から教えてしまうのではなく、「子供自ら何と何を比べるべきかに気付かせる（思考プロセス①〜②）」ような問いかけ。
+2. 児童A（単一数量で判断）には、不公平さや条件の違い（全体の母数）に気付かせる揺さぶり。
+3. 児童B（個別知識の計算で満足）には、「その出た数字は元の問題に対して何を教えてくれている？」と現実の問題に戻して吟味させる問い。
+4. 児童C（総合的な発揮）には、その思考のプロセス（なぜ公平に比べられたか）を言語化させ、学級全体の学びのモデルとして広げる仕掛け。
+
+以下のJSONフォーマットのみを返してください:
+{
+  "diagnosis": "現在の児童の認知状態の見立て（なぜその考えに至っているのか、何が課題か）（60〜100字）",
+  "spokenFeedback": "教員が児童に直接投げかける声かけ・問いのセリフ（「〜だね。でももし〜だったらどうかな？」など温かく思考を促す話し言葉）",
+  "scaffoldingStep": "思考を次のステップへ進めるための具体的な支援・手立て（図・具体物・ペア対話など）",
+  "worksheetComment": "ノートや振り返りシートに朱書きするコメント例（努力の承認＋次の問いかけ）",
+  "wholeClassStrategy": "学級全体の授業改善にどう生かすか（板書での取り上げ方や練り上げの展開案）"
+}`;
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+        config: {
+          responseMimeType: 'application/json',
+          temperature: 0.3,
+        }
+      });
+
+      const responseText = response.text || '{}';
+      const parsedData = JSON.parse(responseText);
+      return res.json(parsedData);
+    } catch (err: any) {
+      console.error('Gemini coach error:', err);
+      return res.status(500).json({ error: err.message || 'AIコーチのアドバイス生成中にエラーが発生しました' });
+    }
+  });
+
   // Vite middleware in dev
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
